@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Check | Fraud Detection System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <span>🛡️</span> Fraud Detection System
+        </a>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/history">History</a>
+            <a href="/manual" style="color: var(--primary);">Manual Check</a>
+            <a href="/csv">Batch Processing</a>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 800px;">
+        <div class="card">
+            <h1>Manual Risk Assessment</h1>
+            <p style="margin-bottom: 2rem;">Enter transaction details for real-time behavioral analysis.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert {% if category == 'danger' %}alert-danger{% else %}alert-success{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>User ID</label>
+                        <input type="text" name="user_id" class="form-control" required placeholder="C123456">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount ($)</label>
+                        <input type="number" step="0.01" name="f1" class="form-control" required placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>User Latitude</label>
+                        <input type="number" step="any" name="f2" class="form-control" required placeholder="0.0000">
+                    </div>
+                    <div class="form-group">
+                        <label>User Longitude</label>
+                        <input type="number" step="any" name="f3" class="form-control" required placeholder="0.0000">
+                    </div>
+                </div>
+
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Merchant Lat</label>
+                        <input type="number" step="any" name="f6" class="form-control" required placeholder="0.0000">
+                    </div>
+                    <div class="form-group">
+                        <label>Merchant Long</label>
+                        <input type="number" step="any" name="f7" class="form-control" required placeholder="0.0000">
+                    </div>
+                </div>
+
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>City Population</label>
+                        <input type="number" name="f4" class="form-control" required placeholder="1000">
+                    </div>
+                    <div class="form-group">
+                        <label>Unix Time (Optional)</label>
+                        <input type="number" name="f5" class="form-control" placeholder="Leave empty for current">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Analyze
+                    Transaction</button>
+            </form>
+
+            {% if risk is not none %}
+            <div class="result {% if prediction == 'FRAUD' %}fraud{% else %}legit{% endif %}"
+                style="margin-top: 2rem; padding: 2rem;">
+                <div
+                    style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; margin-bottom: 0.5rem;">
+                    Prediction Result</div>
+                <div style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;">{{ prediction }}</div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                    <span
+                        class="badge {% if status == 'HIGH RISK' %}badge-danger{% elif status == 'MEDIUM RISK' %}badge-warning{% else %}badge-success{% endif %}">{{
+                        status }}</span>
+                    <span style="font-weight: 600;">Risk Score: {{ risk }}%</span>
+                </div>
+                {% if pred_mode == 'history' %}
+                <div style="margin-top: 1rem; font-size: 0.875rem; font-style: italic;">Based on behavioral analysis of
+                    {{ history_count }} past transactions.</div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Fraud Detection System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <span>🛡️</span> Fraud Detection System
+        </a>
+        <div class="nav-links">
+            <a href="/dashboard" style="color: var(--primary);">Dashboard</a>
+            <a href="/history">History</a>
+            <a href="/manual">Manual Check</a>
+            <a href="/csv">Batch Processing</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1>Security Dashboard</h1>
+            <span class="badge badge-success">System Online</span>
+        </div>
+
+        <div class="grid" style="margin-bottom: 3rem;">
+            <div class="card stat-card">
+                <div class="stat-value">{{ total_count }}</div>
+                <div class="stat-label">Total Transactions</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" style="color: var(--danger);">{{ fraud_count }}</div>
+                <div class="stat-label">Fraud Detected</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" style="color: var(--success);">{{ legit_count }}</div>
+                <div class="stat-label">Legit Transactions</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" style="color: var(--warning);">{{ avg_risk }}%</div>
+                <div class="stat-label">Avg Risk Score</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Recent Activity</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Amount</th>
+                            <th>Time</th>
+                            <th>Risk Score</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in recent_data %}
+                        <tr>
+                            <td>{{ row.user_id }}</td>
+                            <td>${{ row.amount }}</td>
+                            <td>{{ row.trans_time }}</td>
+                            <td>
+                                <div
+                                    style="width: 100%; background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div class="{% if row.risk_score > 75 %}bg-danger{% elif row.risk_score > 40 %}bg-warning{% else %}bg-success{% endif %}"
+                                        style="width: {{ row.risk_score }}%; height: 100%;"></div>
+                                </div>
+                                <span style="font-size: 0.75rem; font-weight: 600;">{{ row.risk_score }}%</span>
+                            </td>
+                            <td>
+                                <span
+                                    class="badge {% if row.status == 'HIGH RISK' %}badge-danger{% elif row.status == 'MEDIUM RISK' %}badge-warning{% else %}badge-success{% endif %}">
+                                    {{ row.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="/history" class="btn btn-outline">View Full History</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

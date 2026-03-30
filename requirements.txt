@@ -1,0 +1,11 @@
+flask
+pandas
+numpy 
+joblib
+xgboost
+python-dotenv
+mysql-connector-python
+scikit-learn
+# Note: tensorflow is required for Neural Network models, 
+# but may need to be installed separately based on Python version.
+# tensorflow 

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Processing | Fraud Detection System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <span>🛡️</span> Fraud Detection System
+        </a>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/history">History</a>
+            <a href="/manual">Manual Check</a>
+            <a href="/csv" style="color: var(--primary);">Batch Processing</a>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 800px;">
+        <div class="card">
+            <h1>Batch Fraud Detection</h1>
+            <p style="margin-bottom: 2rem;">Upload a CSV file containing transaction data for high-speed ensemble model
+                processing.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert {% if category == 'danger' %}alert-danger{% else %}alert-success{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" enctype="multipart/form-data"
+                style="border: 2px dashed #e2e8f0; padding: 3rem; border-radius: 12px; text-align: center;">
+                <input type="file" name="file" accept=".csv" required id="csv-upload" style="display: none;">
+                <label for="csv-upload" style="cursor: pointer;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
+                    <div style="font-weight: 600; color: var(--primary); margin-bottom: 0.5rem;">Click to upload or drag
+                        and drop</div>
+                    <div style="font-size: 0.875rem; color: var(--text-light);">CSV files only (Max 50MB)</div>
+                </label>
+                <div id="file-name" style="margin-top: 1rem; font-weight: 600; color: var(--success); display: none;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 2rem; width: 200px;">Process
+                    File</button>
+            </form>
+
+            <script>
+                document.getElementById('csv-upload').addEventListener('change', function (e) {
+                    const fileName = e.target.files[0].name;
+                    const display = document.getElementById('file-name');
+                    display.textContent = 'Selected: ' + fileName;
+                    display.style.display = 'block';
+                });
+            </script>
+
+            {% if summary %}
+            <div class="grid" style="margin-top: 3rem;">
+                <div class="card stat-card" style="box-shadow: none; border: 1px solid #f1f5f9;">
+                    <div class="stat-value" style="color: var(--danger);">{{ summary.fraud }}</div>
+                    <div class="stat-label">Fraudulent</div>
+                </div>
+                <div class="card stat-card" style="box-shadow: none; border: 1px solid #f1f5f9;">
+                    <div class="stat-value" style="color: var(--success);">{{ summary.legit }}</div>
+                    <div class="stat-label">Legitimate</div>
+                </div>
+            </div>
+
+            {% if download_file %}
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="/download/{{ download_file }}" class="btn btn-outline" style="width: 100%;">📥 Download Fraud
+                    Report</a>
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
+                <h3>Transaction Analysis</h3>
+                <div style="max-width: 400px; margin: 2rem auto;">
+                    <canvas id="fraudChart" data-fraud="{{ summary.fraud }}" data-legit="{{ summary.legit }}"></canvas>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 600;">Model Confidence Score</span>
+                        <span style="font-weight: 700; color: var(--primary);">{{ (metrics.accuracy * 100)|round(2)
+                            }}%</span>
+                    </div>
+                    <div style="width: 100%; background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                        <div class="bg-primary" style="width: {{ metrics.accuracy * 100 }}%; height: 100%;"></div>
+                    </div>
+                </div>
+
+                <script>
+                    (function () {
+                        const canvas = document.getElementById('fraudChart');
+                        if (!canvas) return;
+                        const fraud = parseInt(canvas.dataset.fraud);
+                        const legit = parseInt(canvas.dataset.legit);
+                        const ctx = canvas.getContext('2d');
+                        new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: ['Fraudulent', 'Legit'],
+                                datasets: [{
+                                    data: [fraud, legit],
+                                    backgroundColor: ['#ef4444', '#22c55e'],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                    }
+                                }
+                            }
+                        });
+                    })();
+                </script>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+
+</html>

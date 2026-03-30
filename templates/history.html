@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History | Fraud Detection System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <span>🛡️</span> Fraud Detection System
+        </a>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/history" style="color: var(--primary);">History</a>
+            <a href="/manual">Manual Check</a>
+            <a href="/csv">Batch Processing</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1>Transaction History</h1>
+            <a href="/csv" class="btn btn-primary">Process New CSV</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert {% if category == 'danger' %}alert-danger{% else %}alert-success{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User ID</th>
+                        <th>Amount</th>
+                        <th>Time</th>
+                        <th>Location</th>
+                        <th>Risk Score</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        <td>#{{ row.id }}</td>
+                        <td><strong>{{ row.user_id }}</strong></td>
+                        <td>${{ row.amount }}</td>
+                        <td>{{ row.trans_time }}</td>
+                        <td><small>{{ row.latitude }}, {{ row.longitude }}</small></td>
+                        <td>
+                            <div class="{% if row.risk_score > 75 %}text-danger{% elif row.risk_score > 40 %}text-warning{% else %}text-success{% endif %}"
+                                style="font-weight: 700;">
+                                {{ row.risk_score }}%
+                            </div>
+                        </td>
+                        <td>
+                            <span
+                                class="badge {% if row.status == 'HIGH RISK' %}badge-danger{% elif row.status == 'MEDIUM RISK' %}badge-warning{% else %}badge-success{% endif %}">
+                                {{ row.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <form action="/delete/{{ row.id }}" method="POST"
+                                onsubmit="return confirm('Delete this record?');">
+                                <button type="submit" class="btn"
+                                    style="padding: 0.4rem 0.8rem; background: #fee2e2; color: #991b1b; font-size: 0.8rem;">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not data %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-light);">No
+                            transactions found in history.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+
+</html>
